@@ -38,6 +38,7 @@ function PaaSCoreCalculator {
         "Standard" { $CoreArray["dtu_standard"] = $CoreArray["dtu_standard"] + $Capacity }
         "Basic" { $CoreArray["dtu_standard"] = $CoreArray["dtu_standard"] + $Capacity }
         "GeneralPurpose" { $CoreArray["vcore_gp"] = $CoreArray["vcore_gp"] + $Capacity }
+        "Hyperscale" { $CoreArray["vcore_hs"] = $CoreArray["vcore_hs"] + $Capacity }
         "BusinessCritical" { $CoreArray["vcore_bc"] = $CoreArray["vcore_bc"] + $Capacity }
      }
 
@@ -168,7 +169,8 @@ function MainFunction {
                     dtu_standard = 0; 
                     dtu_premium = 0; 
                     vcore_gp = 0; 
-                    vcore_bc = 0; 
+                    vcore_bc = 0;
+                    vcore_hs = 0; 
                     iaas_enterprise = 0;
                     iaas_standard = 0;
                     iaas_web = 0;
@@ -270,7 +272,8 @@ function MainFunction {
     #Summary of all vCore counts
     $vcore_table = @( 
                         @{Edition="General Purpose"; "vCore Total"=$core_array["vcore_gp"]},
-                        @{Edition="Business Critical"; "vCore Total"=$core_array["vcore_bc"]}
+                        @{Edition="Business Critical"; "vCore Total"=$core_array["vcore_bc"]},
+                        @{Edition="Hyperscale"; "vCore Total"=$core_array["vcore_hs"]}
                     )
     $vcore_table | ForEach {[PSCustomObject]$_} | Format-Table -AutoSize Edition, "vCore Total"
 
@@ -318,13 +321,12 @@ function MainFunction {
         { 
            MainFunction
         } elseif ($continue.ToLower() -eq 'n') {
-           Write-Host -ForegroundColor Red "Exiting"
+           Write-Host -ForegroundColor Green "Exiting, thanks for stopping by"
            Exit
         } else {
           Write-Host -ForegroundColor Red "Invalid Selection"
         }
     }
-
 }
 
 MainFunction
