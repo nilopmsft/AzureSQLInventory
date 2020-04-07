@@ -3,8 +3,7 @@
 Azure Hybrid Use Benefit (AHUB) allows for taking advantage of cost savings of Azure services that are licensed with Software Assurance, in this case SQL licenses.
 [SQL AHUB Information](https://azure.microsoft.com/en-us/pricing/hybrid-benefit/#services&clcid=0x409)
 
-[Azure Reservations](https://azure.microsoft.com/en-us/reservations/) allows for users to reserve select compute resources for 1 or 3 year commitments and get substantial savings. In regards to SQL PaaS, [here is more information on Azure SQL reserved capacity.]
-(https://docs.microsoft.com/en-us/azure/sql-database/sql-database-reserved-capacity)
+[Azure Reservations](https://azure.microsoft.com/en-us/reservations/) allows for users to reserve select compute resources for 1 or 3 year commitments and get substantial savings. In regards to SQL PaaS, [here is more information on Azure SQL reserved capacity.](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-reserved-capacity)
 
 This simple Powershell script will provide an output which shows AHUB/Reserved Capacity eligible totals of:
 * SQL PaaS vCores.
