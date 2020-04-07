@@ -121,7 +121,8 @@ Write-Host @"
 This tool is designed to gather the core count of eligible SQL resources which AHUB or Reserved Capacity could be applied. It will scan for all PaaS 
 and IaaS (must be registered with the SQL Resource Provider to be seen) SQL resources in a given subscription after which providing a summary of resources.
 
-NOTE: This tool is using basic ARM calls to gather information. If a resource is not eligible for AHUB/Reservations e.g. Azure SQL Serverless, or you do not have permissions to view those resources on the subscription they will not be included. 
+NOTE: This tool is using basic ARM calls to gather information. If a resource is not eligible for AHUB/Reservations e.g. Azure SQL Serverless, or you do not 
+have permissions to view those resources on the subscription they will not be included. 
 The results of this tool are best effort for guidance and may not accurately reflect all resources across reviewed subscriptions.
 "@
 
