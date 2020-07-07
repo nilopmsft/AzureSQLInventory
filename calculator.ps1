@@ -67,6 +67,30 @@ function IaaSCoreCalculator {
      return $CoreArray
 }
 
+function ServiceObjectiveCalculator {
+    
+    Param(
+        #SLO of SQL Object
+        $ServiceObjectiveName,
+        #Existing array of ServiceObjectiveCalculator results
+        $ServiceObjectiveArray
+    )
+
+    
+    if ($ServiceObjectiveArray.ContainsKey($ServiceObjectiveName)) {
+
+        $ServiceObjectiveArray[$ServiceObjectiveName] = $ServiceObjectiveArray[$ServiceObjectiveName] + 1
+    
+    } else {
+
+        $ServiceObjectiveArray[$ServiceObjectiveName] = 1
+
+    }
+
+    return $ServiceObjectiveArray
+}
+
+
 #Function for just showing some progress in case there is a lot of resources.  Some silly statement if it starts to get to a large amount of them.
 function ProgressBar {
     Param(
@@ -179,11 +203,15 @@ function MainFunction {
                     iaas_express = 0;
                     iaas_developer = 0;
                     }
+
+    $serviceobjective_array = @{}
+    
     $count = 0
     $db_count = 0
     $pool_count = 0
     $mi_count = 0
- 
+    
+
     Write-Host "`r`nGathering SQL Information, this may take some time depending on the number of resources" -ForegroundColor Cyan
 
     #Gathering all single databases and elastic pools
@@ -194,7 +222,6 @@ function MainFunction {
             #Get all the databases that are not DW, a Pool and not the master database
             $databases = Get-AzSqlDatabase -ServerName $sqlserver.ServerName $sqlserver.ResourceGroupName | 
                          Where-Object {$_.DatabaseName -ne 'master' `
-                         -and $_.Edition -ne 'DataWarehouse' `
                          -and $_.Edition -ne 'DataWarehouse' `
                          -and $_.SkuName -ne 'ElasticPool' `
                          -and $_.SkuName -notlike "GP_S*" `
@@ -207,7 +234,11 @@ function MainFunction {
                 $db_count++
 
                 $core_array = PaaSCoreCalculator -Edition $db.Edition -Capacity $db.Capacity -CoreArray $core_array
-      
+
+                $singleton_slo = "Singleton_" + $db.Edition + "_" + $db.Capacity
+
+                $serviceobjective_array = ServiceObjectiveCalculator -ServiceObjectiveName $singleton_slo -ServiceObjectiveArray $serviceobjective_array
+                
             }
 
             #Going through all pools on the server
@@ -217,6 +248,11 @@ function MainFunction {
                 $pool_count++
 
                 $core_array = PaaSCoreCalculator -Edition $pool.Edition -Capacity $pool.Capacity -CoreArray $core_array
+                
+                $pool_slo = "Pool_" + $pool.Edition + "_" + $pool.Capacity
+                
+                $serviceobjective_array = ServiceObjectiveCalculator -ServiceObjectiveName $pool_slo -ServiceObjectiveArray $serviceobjective_array
+                
             }
 
             $count++;
@@ -232,12 +268,16 @@ function MainFunction {
          $mi_count++
          $core_array = PaaSCoreCalculator -Edition $instance.Sku.Tier -Capacity $instance.VCores -CoreArray $core_array
 
+         $mi_slo = "ManagedInstance_" + $instance.Sku.Tier + "_" + $instance.VCores
+              
+         $serviceobjective_array = ServiceObjectiveCalculator -ServiceObjectiveName $mi_slo -ServiceObjectiveArray $serviceobjective_array
+   
+
          $count++;
          ProgressBar -Count $count
      }
  
-     #COMING SOON, SQL Registered VMs
-     #loop through SQL registered VM's to get the size of the VM and the SQL edition
+    #loop through SQL registered VM's to get the size of the VM and the SQL edition
 
     $vm_count = 0; 
 
@@ -269,6 +309,15 @@ function MainFunction {
                      )
     $summary_table | ForEach {[PSCustomObject]$_} | Format-Table -AutoSize Resource, Total
 
+    #Count of service Objectives for SQL PaaS objects
+    $socount_table = @()
+    foreach ($so in $serviceobjective_array.keys) {
+        $socount_table += @{"Resource Tiers"=$so; "Count"=$serviceobjective_array[$so]}
+    }
+
+    $socount_table | ForEach {[PSCustomObject]$_} | Sort-Object "Resource Tiers" | Format-Table -AutoSize "Resource Tiers", "Count" 
+
+
 
     Write-Host "vCore" -ForegroundColor Cyan
     #Summary of all vCore counts
@@ -279,7 +328,7 @@ function MainFunction {
                     )
     $vcore_table | ForEach {[PSCustomObject]$_} | Format-Table -AutoSize Edition, "vCore Total"
 
-    Write-Host "DTU (if moved to vCore)" -ForegroundColor Cyan
+    Write-Host "DTU" -ForegroundColor Cyan
 
     #Summary of all DTU counts
     $dtu_table = @( 
@@ -288,14 +337,14 @@ function MainFunction {
                     )
     $dtu_table | ForEach {[PSCustomObject]$_} |Format-Table -AutoSize Edition, "DTU Total"
 
+    
     $dtu_ratio = @( 
                         @{Edition="Standard/Basic"; "vCore Conversion"=$core_array["dtu_standard"] / 100; "DTU/vCore Ratio"="100/1"},
                         @{Edition="Premium"; "vCore Conversion"=$core_array["dtu_premium"] / 125; "DTU/vCore Ratio"="125/1"}
                     )
 
     $dtu_ratio | ForEach {[PSCustomObject]$_} | Format-Table -AutoSize Edition, "vCore Conversion", "DTU/vCore Ratio"
-
-
+  
     Write-Host "`r`nSQL IaaS Summary" -ForegroundColor Yellow
 
     #Summary of all SQL IaaS VM's
@@ -311,9 +360,7 @@ function MainFunction {
                             )
     $iaas_core_table | ForEach {[PSCustomObject]$_} | Format-Table -AutoSize "SQL Edition", "Core Total"
 
-
     
-
     while(1) {
         
         Write-Host -ForegroundColor Yellow "`r`nWould you like run on another Subscription? " -NoNewLine
