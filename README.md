@@ -1,11 +1,12 @@
-# SQL Azure Hybrid Use & Reserved Capacity Calculator
+# Azure SQL Inventory Auditor
 
 Azure Hybrid Use Benefit (AHUB) allows for taking advantage of cost savings of Azure services that are licensed with Software Assurance, in this case SQL licenses.
 [SQL AHUB Information](https://azure.microsoft.com/en-us/pricing/hybrid-benefit/#services&clcid=0x409)
 
 [Azure Reservations](https://azure.microsoft.com/en-us/reservations/) allows for users to reserve select compute resources for 1 or 3 year commitments and get substantial savings. In regards to SQL PaaS, [here is more information on Azure SQL reserved capacity.](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-reserved-capacity)
 
-This simple Powershell script will provide an output which shows AHUB/Reserved Capacity eligible totals of:
+This simple Powershell script will provide an output which shows your accessible IaaS and PaaS SQL resources in Azure which are eligible for either AHUB or Reservervations. This includes:
+
 * SQL PaaS vCores.
 * SQL PaaS DTU's for conversion to vCore model.
 * SQL IaaS registered VM cores by SQL Edition.
