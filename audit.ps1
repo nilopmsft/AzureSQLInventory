@@ -138,8 +138,6 @@ function IntValidation {
 
 # Our code entry point, We verify the subscription and move through the steps from here.
 Clear-Host
-$currentsub = Get-AzContext
-$currentsubfull = $currentsub.Subscription.Name + " (" + $currentsub.Subscription.Id + ")"
 Write-Host "Azure Hybrid Use Benefit SQL Calulator Tool`r`n" -ForegroundColor Yellow
 Write-Host @"
 This tool is designed to gather the core count of eligible SQL resources which AHUB or Reserved Capacity could be applied. It will scan for all PaaS 
@@ -151,7 +149,11 @@ The results of this tool are best effort for guidance and may not accurately ref
 "@
 
 function MainFunction {
+
     #Gathering subscription selection, validating input and changing to another subscription if needed
+    $currentsub = Get-AzContext
+    $currentsubfull = $currentsub.Subscription.Name + " (" + $currentsub.Subscription.Id + ")"
+    
     $rawsubscriptionlist = Get-AzSubscription | Where-Object {$_.State -ne "Disabled"} | Sort-Object -property Name | Select-Object Name, Id 
     $subscriptionlist = [ordered]@{}
     $subscriptionlist.Add(1, "CURRENT SUBSCRIPTION: $($currentsubfull)")
