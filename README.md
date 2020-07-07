@@ -17,5 +17,5 @@ This tool is designed to give a high level view of SQL resources to aid in licen
 
 1. [Open Azure Cloud Shell in your Azure Portal](https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart-powershell#start-cloud-shell)
 2. Run `cd ~`
-3. Clone the repository with: `git clone https://github.com/nilopmsft/SQLAHUBCoreCalculator.git`
-4. Run the powershell script with `./SQLAHUBCoreCalculator/calculator.ps1`
+3. Clone the repository with: `git clone https://github.com/nilopmsft/AzureSQLInventory.git`
+4. Run the powershell script with `./AzureSQLInventory/audit.ps1`
